@@ -1,0 +1,335 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <script src="~/Scripts/modernizr-2.6.2.js"></script>
+    <link href="~/Content/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/Content/Ionicons/css/ionicons.min.css" rel="stylesheet" />
+    <link href="~/Content/AdminLTE.min.css" rel="stylesheet" />
+    <style>
+        #comment {
+            height: 90px;
+        }
+        .blue-backg {
+            background-color: #208ab8;
+            background-size: cover;
+        }
+        .centralize {
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 30px;
+            width: 98%;
+        }
+        .spacing-p {
+            padding: 10px 10px 10px 10px;
+        }
+        .verified {
+            border-color: green;
+        }
+        .error {
+            border-color:red;
+        }
+    </style>
+
+</head>
+<body class="blue-backg" ng-app="MyApp">
+    <div class="box box-primary centralize spacing-p" ng-controller="FormCtrl">
+        <div class="box-header with-border">
+            <div id="representacion">
+                <input type="checkbox" ng-model="isCompany"> Represento a una institución
+            </div>
+        </div>
+        <div class="box-body">
+            <form name="exampleform" enctype="multipart/form-data">
+                <div class="form-group">
+                    <div class="row" style="margin-bottom: 10px;" id="rowidentificacion">
+                        <div class="col-lg-2 col-md-2 col-sm-2">
+                            <label for="cedula">Cédula*</label>
+                            <input class="form-control" name="cedula" id="cedula" type="text" placeholder="Cédula" required
+                                   minlength="11" maxlength="11"
+                                   ng-class="{verified :idVerified,error:!idVerified && exampleform.cedula.$dirty }"
+                                   ng-model="formFields.id"
+                                   ng-change="verifyID()" />
+                            <p class="text-danger" ng-if="!idVerified && exampleform.cedula.$dirty&& !exampleform.myName.$touched">La cedula es invalida</p>
+                            <span class="text-danger" ng-if="exampleform.cedula.$touched && exampleform.cedula.$invalid">cedula es requerida</span>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-2">
+                            <label for="nombre">Nombre*</label>
+                            <input class="form-control" name="name" type="text" placeholder="Nombre"
+                                   ng-model="formFields.name"/>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-2">
+                            <label for="email">E-Mail</label>
+                            <input class="form-control" name="email" type="email" placeholder="Correo electrónico"
+                                   required
+                                   ng-model="formFields.email" />
+                            <span class="text-danger" ng-if="exampleform.email.$touched && exampleform.email.$invalid">cedula es requerida</span>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-2">
+                            <label for="telefono">Teléfono</label>
+                            <input class="form-control" name="phone" type="tel" placeholder="Teléfono"
+                                   ng-model="formFields.phone"/>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-2">
+                            <label for="provincia">Provincia*</label>
+                            <select class="form-control" name="province"
+                                    ng-options="option.Provincia for option in formFields.provinces.availableOptions track by option.Provincia"
+                                    ng-model="formFields.provinces.selectedOption"
+                                    ng-change="loadCounty()">
+                            </select>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-2">
+                            <label for="municipio">Municipio*</label>
+                            <select class="form-control" name="county"
+                                    ng-options="option for option in formFields.counties.availableOptions track by option"
+                                    ng-model="formFields.counties.selectedOption"
+                                    ng-change="result()">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-bottom: 10px;">
+                        <div id="datosinstitucion" ng-if="isCompany">
+                            <div class="col-lg-3 col-md-3 col-sm-3">
+                                <label for="rnc">RNC*</label>
+                                <input class="form-control" name="rnc" type="text" placeholder="Registro Nacional de Contribuyentes"
+                                       ng-class="{verified :rncVerified,error:!rncVerified && exampleform.rnc.$dirty }"
+                                       ng-model="formFields.rnc"
+                                       ng-change="verifyRNC()" />
+                                <p class="text-danger" ng-if="!rncVerified && exampleform.rnc.$dirty">La rnc es invalida</p>
+                            </div>
+                            <div class="col-lg-5 col-md-5 col-sm-5">
+                                <label for="razonsocial">Nombre/Razón Social*</label>
+                                <input class="form-control" name="company" type="text" placeholder="Razón Social" readonly="" 
+                                       ng-model="formFields.company"
+                                       ng-class="{verified :rncVerified,error:!rncVerified && exampleform.rnc.$dirty }"/>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-4">
+                                <label for="posicion">Posición o Cargo*</label>
+                                <input class="form-control" name="position" type="text" placeholder="Cargo que desempeña"
+                                       ng-model="formFields.position"/>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-xs-12">
+                            <label for="comentario">Comentarios y Sugerencias*</label>
+                            <textarea class="form-control" name="comment" id="comment"
+                                      ng-model="formFields.comment"></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-8 col-md-8 col-sm-8">
+                            <label for="archivo"> </label>
+                            <input id="archivo" name="myFile" type="file"
+                                   file-upload
+                                   ng-model="formFields.file" />
+                            <p class="help-block">Tamaño máximo total: 4Mb.</p>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="box-footer">
+            <button class="btn btn-primary" type="button" id="btnEnviar" ng-click="submitData()">Enviar</button>
+            <br />
+            <div id="mensajeResultado"></div>
+        </div>
+    </div>
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/adminlte.min.js"></script>
+    <script src="~/Scripts/angular.min.js"></script>
+    <script type="text/javascript" src="~/Scripts/provincias.json"></script>
+    <script>
+        var data = JSON.parse(provincias);
+        var MyApp = angular.module("MyApp", []);
+
+        MyApp.directive('fileUpload', function () {
+            return {
+                scope: true,
+                link: function (scope, el, attrs) {
+                    el.bind('change', function (event) {
+                        var files = event.target.files;
+                        //iterate files since 'multiple' may be specified on the element
+                        if (files.length == 0) {
+                            scope.$emit("fileSelected", { file: null, field: event.target.name });
+                        } else {
+                            for (var i = 0; i < files.length; i++) {
+                                //emit event upward
+                                scope.$emit("fileSelected", { file: files[i], field: event.target.name });
+                            }
+                        }
+                    });
+                }
+            };
+        });
+
+        MyApp.service('HttpRequest', function ($http) {
+            this.validateId = function (cedula) {
+                try {
+                    return $http.post("/Persona/GetPersona", { cedula: cedula }).
+                        then(function (response) {
+                            return response.data;
+                        }, function (error) {
+                            console.log(error);
+                        });
+                } catch (e) {
+                    alert("error en el servidor, consulte la consola para mas info");
+                    console.log(e);
+
+                }
+            }
+            this.validateRNC = function (rnc) {
+                try {
+                    return $http.get("http://app.mopc.gob.do/Utilitario/api/rnc/buscarrnc?rnc=" + rnc + "&uid=7c9e6679-7425-40de-944b-e07fc1f90ae7").
+                        then(function (response) {
+                            return response.data;
+                        }, function (error) {
+                            console.log(error);
+                        });
+                } catch (e) {
+                    alert("API key Expiro, consulte la consola para mas info");
+                    console.log(e);
+                }
+            }
+
+            this.submit = function (data, uploadUrl) {
+                return $http({
+                    method: 'POST',
+                    url: uploadUrl,
+                    headers: { 'Content-Type': undefined },
+                    transformRequest: function () {
+                        var fdata = new FormData();
+                        fdata.append("Cedula", data.id);
+                        fdata.append("Nombre", data.name);
+                        fdata.append("Email", data.email);
+                        fdata.append("Telefono", data.phone);
+                        fdata.append("Provincia", data.provinces.selectedOption.Provincia);
+                        fdata.append("Municipio", data.counties.selectedOption);
+                        fdata.append("RNC", data.rnc);
+                        fdata.append("RazonSocial", data.company);
+                        fdata.append("Posicion", data.position);
+                        fdata.append("Comentarios", data.comment);
+                        if (data.file) {
+                            fdata.append("file", data.file);
+                        }
+                        return fdata;
+                    }
+                });
+            }
+        });
+
+        MyApp.controller("FormCtrl", function ($scope, HttpRequest) {
+            $scope.isCompany = false;
+            $scope.rncVerified = false;
+            $scope.idVerified = false;
+            $scope.formFields = {
+                id : "",
+                name : "",
+                email : "",
+                phone : "",
+                rnc : "",
+                company: "",
+                position : "",
+                comment : "",
+                file : "",
+                provinces : {
+                    availableOptions: data.Provincias,
+                    selectedOption: {}
+                },
+                counties : {
+                    availableOptions: "",
+                    selectedOption: ""
+                }
+            }
+
+            $scope.loadCounty = function () {
+                if ($scope.formFields.provinces.selectedOption !== null) {
+                    $scope.formFields.counties.availableOptions = $scope.formFields.provinces.selectedOption.Municipios;
+                    $scope.formFields.counties.selectedOption = "";
+                } else {
+                    $scope.formFields.counties.availableOptions = []
+                    $scope.formFields.counties.selectedOption = "";
+                }
+                
+            }
+            $scope.verifyID = function () {
+                var promise = HttpRequest.validateId($scope.formFields.id);
+                promise.then(function (result) {
+                    if (result.Success !== undefined) {
+                        if (result.Data != null) {
+                            $scope.idVerified = true;
+                            $scope.formFields.name = result.Data.Nombre;
+                        } else {
+                            $scope.idVerified = false;
+                            $scope.formFields.name = "";
+                        }
+                    }
+                });
+            }
+
+            $scope.verifyRNC = function () {
+                var promise = HttpRequest.validateRNC($scope.formFields.rnc);
+                promise.then(function (result) {
+                    if (result !== undefined) {
+                        if (result.Success !== undefined) {
+                            if (result.ResponseText != "null") {
+                                $scope.rncVerified = true;
+                                var ResponseText = JSON.parse(result.ResponseText);
+                                $scope.formFields.company = ResponseText.Nombre;
+                            } else {
+                                $scope.rncVerified = false;
+                                $scope.formFields.company = "";
+                            }
+                        }
+                    }
+                });
+            }
+            $scope.submitData = function () {
+                if ($scope.exampleform.$valid) {
+                    HttpRequest.submit($scope.formFields, '/Cliente/AddCliente')
+                        .then(function (result) {
+                            if (result.data.Success) {
+                                alert("formulario enviado exitosamente");
+                                console.log(result.data.Data)
+                            }
+                            $scope.formFields = {}
+                            $scope.exampleform.$setPristine();
+                            $scope.formFields.provinces = {
+                                availableOptions: data.Provincias,
+                                selectedOption: {}
+                            };
+                            $scope.formFields.counties = {
+                                availableOptions: "",
+                                selectedOption: ""
+                            };
+                            $scope.isCompany = false;
+                            $scope.rncVerified = false;
+                            $scope.idVerified = false;   
+                            
+                            
+                        });
+                }
+              
+                
+            }
+            $scope.$on("fileSelected", function (event, args) {
+                $scope.$apply(function () {
+                    switch (args.field) {
+                        case "myFile":
+                            $scope.formFields.file = args.file;
+                            break;
+                        default:
+                            break;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
